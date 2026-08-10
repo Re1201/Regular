@@ -7,6 +7,11 @@ data/*.csv
 _ref/
 
 
+# 数据库连接配置（含密码，绝不入库）
+db_config.py
+python_code/db_config.py
+.env
+
 # Python
 __pycache__/
 *.py[cod]
