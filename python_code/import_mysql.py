@@ -48,11 +48,13 @@ def main():
         print("[2/4] 建表完成: user_behavior_sample")
 
         # 3. LOAD DATA（LOCAL: 从客户端文件读入；字段顺序与 CSV 列一致）
+        #    IGNORE 1 LINES: 跳过 sample_data.py 写出的表头行，避免表头被当数据导入
         load_sql = f"""
         LOAD DATA LOCAL INFILE '{SRC.as_posix()}'
         INTO TABLE user_behavior_sample
         FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
         LINES TERMINATED BY '\\n'
+        IGNORE 1 LINES
         (user_id, item_id, category_id, behavior_type, ts);
         """
         cur.execute(load_sql)
