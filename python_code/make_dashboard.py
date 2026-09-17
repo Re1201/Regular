@@ -39,7 +39,7 @@ def make_funnel():
             tooltip_opts=opts.TooltipOpts(trigger="item", formatter="{b}: {c}"),
         )
         .set_global_opts(
-            title_opts=opts.TitleOpts(title="用户转化漏斗（浏览→加购→购买）", subtitle="抽样 10% 用户口径"),
+            title_opts=opts.TitleOpts(title="用户转化漏斗（浏览→加购→购买）", subtitle="序列口径：三环节按时序依次发生 · 抽样 10% 用户"),
             legend_opts=opts.LegendOpts(pos_top="5%"),
         )
         .set_series_opts(label_opts=opts.LabelOpts(position="inside"))
@@ -52,6 +52,8 @@ def make_funnel():
 # ---------------- 2. RF 分层图 ----------------
 def make_rf():
     df = read_result("03.csv")  # 03 文件第 1 个查询：分层结果
+    # 按"高价值 → 潜力 → 普通"的价值降序展示，不跟随 CSV 的用户数排序
+    df = df.set_index("分层").reindex(["高价值", "潜力", "普通"]).reset_index()
     layers = df["分层"].tolist()
     users = df["用户数"].tolist()
     contrib = df["购买贡献占比"].tolist()
@@ -75,14 +77,16 @@ def make_rf():
 
 # ---------------- 3. 时段热力图（24h × 7d） ----------------
 def make_heatmap():
-    df = read_result("05_3.csv")  # 05 文件第 3 个查询：星期×小时×PV
+    df = read_result("05_3.csv")  # 05 文件第 3 个查询：星期×小时×日均PV
     day_map = {"Monday": "周一", "Tuesday": "周二", "Wednesday": "周三",
                "Thursday": "周四", "Friday": "周五", "Saturday": "周六", "Sunday": "周日"}
     df["星期"] = df["星期"].map(day_map)
     days = df["星期"].unique().tolist()  # 按首次出现顺序
 
-    value = [[d, int(h), int(v)] for d, h, v in zip(df["星期"], df["小时"], df["PV次数"])]
-    maxv = df["PV次数"].max()
+    # 按"日均 PV"着色：窗口内周六/周日各出现 2 次、周一至周五各 1 次，
+    # 用 PV 合计会让周末整行天然亮约 2 倍（纯天数效应），并非行为差异
+    value = [[d, int(h), int(v)] for d, h, v in zip(df["星期"], df["小时"], df["日均PV"])]
+    maxv = df["日均PV"].max()
 
     chart = (
         HeatMap(init_opts=opts.InitOpts(width="1200px", height="600px"))
@@ -90,7 +94,7 @@ def make_heatmap():
         .add_yaxis("星期", days, value,
                    label_opts=opts.LabelOpts(is_show=False))
         .set_global_opts(
-            title_opts=opts.TitleOpts(title="24 小时 × 7 天 PV 活跃热力图"),
+            title_opts=opts.TitleOpts(title="24 小时 × 7 天 日均 PV 活跃热力图"),
             visualmap_opts=opts.VisualMapOpts(max_=maxv, is_calculable=True),
             yaxis_opts=opts.AxisOpts(name="星期"),
             xaxis_opts=opts.AxisOpts(name="小时", axislabel_opts=opts.LabelOpts(rotate=45)),
@@ -116,7 +120,7 @@ def make_retention():
         .add_yaxis("3日留存率", d3, is_smooth=True, label_opts=opts.LabelOpts(is_show=True))
         .add_yaxis("7日留存率", d7, is_smooth=True, label_opts=opts.LabelOpts(is_show=True))
         .set_global_opts(
-            title_opts=opts.TitleOpts(title="每日注册用户留存曲线（首次行为=注册日）"),
+            title_opts=opts.TitleOpts(title="每日注册用户留存曲线（首次行为=注册日）", subtitle="超出 9 天窗口的档位不可观测，曲线中断（非 0）"),
             legend_opts=opts.LegendOpts(pos_top="5%"),
             yaxis_opts=opts.AxisOpts(name="留存率 %"),
             xaxis_opts=opts.AxisOpts(name="注册日"),
