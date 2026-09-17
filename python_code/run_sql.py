@@ -73,7 +73,7 @@ def main():
                 else:
                     print(f"  查询无数据: {stmt[:40]}...")
             except Exception as e:
-                print(f"  ✗ 执行失败: {e}\n    SQL: {stmt[:100]}...")
+                print(f"  [FAIL] 执行失败: {e}\n    SQL: {stmt[:100]}...")
         conn.commit()
 
     cur.close()
