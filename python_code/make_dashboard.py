@@ -44,7 +44,7 @@ def make_funnel():
         )
         .set_series_opts(label_opts=opts.LabelOpts(position="inside"))
     )
-    out = CHART_DIR / "01_转化漏斗.html"
+    out = CHART_DIR / "01_funnel.html"
     chart.render(out)
     print("已生成:", out)
 
@@ -70,7 +70,7 @@ def make_rf():
             tooltip_opts=opts.TooltipOpts(trigger="axis"),
         )
     )
-    out = CHART_DIR / "02_RF分层.html"
+    out = CHART_DIR / "02_rf_tiers.html"
     chart.render(out)
     print("已生成:", out)
 
@@ -100,7 +100,7 @@ def make_heatmap():
             xaxis_opts=opts.AxisOpts(name="小时", axislabel_opts=opts.LabelOpts(rotate=45)),
         )
     )
-    out = CHART_DIR / "03_时段热力图.html"
+    out = CHART_DIR / "03_hour_heatmap.html"
     chart.render(out)
     print("已生成:", out)
 
@@ -127,7 +127,7 @@ def make_retention():
             tooltip_opts=opts.TooltipOpts(trigger="axis"),
         )
     )
-    out = CHART_DIR / "04_留存曲线.html"
+    out = CHART_DIR / "04_retention.html"
     chart.render(out)
     print("已生成:", out)
 
